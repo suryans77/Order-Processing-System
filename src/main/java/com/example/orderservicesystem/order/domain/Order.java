@@ -48,4 +48,12 @@ public class Order {
     public BigDecimal getAmount() {
         return amount;
     }
+
+    public void markPaymentPending() {
+        this.status = OrderStatus.PAYMENT_PENDING;
+    }
+
+    public void markPaid() {
+        this.status = OrderStatus.PAID;
+    }
 }
