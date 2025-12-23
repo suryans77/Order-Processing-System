@@ -21,8 +21,7 @@ public class InventoryProcessor {
 
     @Async
     @TransactionalEventListener(
-            phase = TransactionPhase.AFTER_COMMIT,
-            fallbackExecution = true
+            phase = TransactionPhase.AFTER_COMMIT
     )
     @Transactional
     public void handlePaymentCompleted(PaymentCompletedEvent event) {
