@@ -1,48 +1,38 @@
 package com.example.orderservicesystem.order.application;
 
 import com.example.orderservicesystem.order.domain.Order;
-import com.example.orderservicesystem.order.domain.OrderCreatedEvent;
-import com.example.orderservicesystem.order.domain.OrderStatus;
 import com.example.orderservicesystem.order.domain.PaymentCompletedEvent;
 import com.example.orderservicesystem.order.infrastructure.OrderRepository;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class PaymentProcessor {
+public class InventoryProcessor {
 
     private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
-    public PaymentProcessor(OrderRepository orderRepository,
-                            ApplicationEventPublisher eventPublisher) {
+    public InventoryProcessor(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     @Async
     @EventListener
     @Transactional
-    public void handleOrderCreated(OrderCreatedEvent event) {
+    public void handlePaymentCompleted(PaymentCompletedEvent event) {
         try {
             Thread.sleep(2000);
 
             Order order = orderRepository.findById(event.orderId())
                     .orElseThrow();
 
-            order.markPaymentPending();
-            order.markPaid();
+            order.reserveInventory();
+            order.complete();
 
             orderRepository.save(order);
 
-            eventPublisher.publishEvent(
-                    new PaymentCompletedEvent(order.getId())
-            );
-
-            System.out.println("Payment completed for order " + order.getId());
+            System.out.println("Inventory reserved & order completed for " + order.getId());
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

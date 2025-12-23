@@ -56,4 +56,13 @@ public class Order {
     public void markPaid() {
         this.status = OrderStatus.PAID;
     }
+
+    public void reserveInventory() {
+        this.status = OrderStatus.INVENTORY_RESERVED;
+    }
+
+    public void complete() {
+        this.status = OrderStatus.COMPLETED;
+    }
+
 }
