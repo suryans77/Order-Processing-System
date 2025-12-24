@@ -1,14 +1,12 @@
 package com.example.orderservicesystem.order.application;
 
-import com.example.orderservicesystem.order.domain.Order;
-import com.example.orderservicesystem.order.domain.OrderCreatedEvent;
-import com.example.orderservicesystem.order.domain.OrderStatus;
-import com.example.orderservicesystem.order.domain.PaymentCompletedEvent;
+import com.example.orderservicesystem.order.domain.*;
 import com.example.orderservicesystem.order.infrastructure.OrderRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -29,13 +27,26 @@ public class PaymentProcessor {
     @TransactionalEventListener(
             phase = TransactionPhase.AFTER_COMMIT
     )
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleOrderCreated(OrderCreatedEvent event) {
         try {
             Thread.sleep(5000);
 
             Order order = orderRepository.findById(event.orderId())
                     .orElseThrow();
+
+            // simulating 30% failure
+            if (Math.random() < 0.3) {
+                order.markPaymentFailed();
+                orderRepository.save(order);
+
+                eventPublisher.publishEvent(
+                        new PaymentFailedEvent(order.getId())
+                );
+
+                System.out.println("Payment FAILED for order " + order.getId());
+                return;
+            }
 
             order.markPaymentPending();
             order.markPaid();

@@ -65,4 +65,17 @@ public class Order {
         this.status = OrderStatus.COMPLETED;
     }
 
+    public void markPaymentFailed() {
+        this.status = OrderStatus.PAYMENT_FAILED;
+    }
+
+    public void markInventoryFailed() {
+        this.status = OrderStatus.INVENTORY_FAILED;
+    }
+
+    public void refund() {
+        this.status = OrderStatus.CANCELLED; // or create REFUNDED if you prefer
+    }
+
+
 }
