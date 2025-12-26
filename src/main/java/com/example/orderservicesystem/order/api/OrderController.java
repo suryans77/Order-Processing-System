@@ -40,5 +40,4 @@ public class OrderController {
         Order order = getOrderService.getById(id);
         return ResponseEntity.ok(OrderResponse.from(order));
     }
-
 }
