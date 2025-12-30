@@ -52,7 +52,7 @@ public class OutboxEvent {
         this.processed = false;
     }
 
-    // ✅ Factory method = clearer intent
+    //Factory method
     public static OutboxEvent create(String aggregateType,
                                      UUID aggregateId,
                                      String eventType,

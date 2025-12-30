@@ -17,18 +17,18 @@ import java.util.List;
 public class OutboxPoller {
 
     private static final Logger log = LoggerFactory.getLogger(OutboxPoller.class);
-    private static final int BATCH_SIZE = 100;
+    private static final int BATCH_SIZE = 50;
 
     private final OutboxRepository outboxRepository;
+    private final EventPublisher eventPublisher;
 
-    public OutboxPoller(OutboxRepository outboxRepository) {
+    public OutboxPoller(OutboxRepository outboxRepository,
+                        EventPublisher eventPublisher) {
         this.outboxRepository = outboxRepository;
+        this.eventPublisher = eventPublisher;
     }
 
-    /**
-     * Poll unprocessed outbox events every 3 seconds
-     */
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 2500)
     @Transactional
     public void poll() {
 
@@ -47,24 +47,15 @@ public class OutboxPoller {
 
         for (OutboxEvent event : events) {
             try {
-                // For now, just log. Later -> publish to Kafka.
-                log.info("📤 Outbox dispatch: type={}, aggregateId={}, payload={}",
-                        event.getEventType(),
-                        event.getAggregateId(),
-                        event.getPayload());
-
-                // Later:
-                // kafkaTemplate.send("orders", event.getAggregateId().toString(), event.getPayload());
-
+                eventPublisher.publish(event);
                 event.markProcessed();
-
-            } catch (Exception ex) {
-                log.error("❌ Failed to dispatch outbox event id={}. Will retry.",
-                        event.getId(), ex);
+            } catch (Exception e) {
+                log.error(
+                        "❌ Failed to publish outbox event id={}",
+                        event.getId(),
+                        e
+                );
             }
         }
-
-        // Persist only the processed flag updates
-        outboxRepository.saveAll(events);
     }
 }
