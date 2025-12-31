@@ -94,4 +94,8 @@ public class OutboxEvent {
         this.processed = true;
         this.processedAt = Instant.now();
     }
+
+    public String getAggregateType() {
+        return aggregateType;
+    }
 }

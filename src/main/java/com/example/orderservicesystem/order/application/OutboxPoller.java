@@ -22,40 +22,39 @@ public class OutboxPoller {
     private final OutboxRepository outboxRepository;
     private final EventPublisher eventPublisher;
 
-    public OutboxPoller(OutboxRepository outboxRepository,
-                        EventPublisher eventPublisher) {
+    public OutboxPoller(OutboxRepository outboxRepository, EventPublisher eventPublisher) {
         this.outboxRepository = outboxRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Scheduled(fixedDelay = 2500)
-    @Transactional
+    @Transactional // Ensures the whole batch succeeds or fails together
     public void poll() {
+        Pageable page = PageRequest.of(0, BATCH_SIZE, Sort.by("createdAt").ascending());
 
-        Pageable page = PageRequest.of(
-                0,
-                BATCH_SIZE,
-                Sort.by("createdAt").ascending()
-        );
-
-        List<OutboxEvent> events =
-                outboxRepository.findByProcessedFalse(page);
+        List<OutboxEvent> events = outboxRepository.findByProcessedFalse(page);
 
         if (events.isEmpty()) {
             return;
         }
 
+        log.info("Starting to poll {} unprocessed events", events.size());
+
         for (OutboxEvent event : events) {
             try {
+                // If publish fails, it throws an exception and markProcessed() is skipped
                 eventPublisher.publish(event);
+
+                // Only called if publish was successful
                 event.markProcessed();
+
             } catch (Exception e) {
-                log.error(
-                        "❌ Failed to publish outbox event id={}",
-                        event.getId(),
-                        e
-                );
+                // Error is caught here so the rest of the 50 events can still try to publish
+                log.error("❌ Skipping event id={} due to failure. Will retry in next cycle.", event.getId());
             }
         }
+
+        // Finalize all state changes in the database
+        outboxRepository.saveAll(events);
     }
 }
