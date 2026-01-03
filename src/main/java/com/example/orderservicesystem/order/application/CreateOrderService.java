@@ -2,7 +2,7 @@ package com.example.orderservicesystem.order.application;
 
 import com.example.orderservicesystem.order.domain.Order;
 import com.example.orderservicesystem.order.domain.OrderCreatedEvent;
-import com.example.orderservicesystem.order.domain.OutboxEvent;
+import com.example.orderservicesystem.order.domain.OrderOutboxEvent;
 import com.example.orderservicesystem.order.infrastructure.OrderRepository;
 import com.example.orderservicesystem.order.infrastructure.OutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,10 +44,8 @@ public class CreateOrderService {
         String payload = serialize(event);
 
         // 3️⃣ Save Outbox event in SAME TX
-        OutboxEvent outbox = OutboxEvent.create(
-                "Order",
-                saved.getId(),
-                "ORDER_CREATED",
+        OrderOutboxEvent outbox = OrderOutboxEvent.createOrder(
+                saved.getId();
                 payload
         );
 

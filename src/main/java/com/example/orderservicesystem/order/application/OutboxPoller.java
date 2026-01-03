@@ -1,7 +1,7 @@
 package com.example.orderservicesystem.order.application;
 
-import com.example.orderservicesystem.order.domain.OutboxEvent;
 import com.example.orderservicesystem.order.infrastructure.OutboxRepository;
+import com.example.orderservicesystem.shared.application.EventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;

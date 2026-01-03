@@ -1,8 +1,6 @@
-package com.example.orderservicesystem.order.infrastructure;
+package com.example.orderservicesystem.shared.infrastructure;
 
-import com.example.orderservicesystem.order.application.EventPublisher;
-import com.example.orderservicesystem.order.domain.OutboxEvent;
-import com.example.orderservicesystem.order.domain.OutboxMessage;
+import com.example.orderservicesystem.shared.application.EventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
