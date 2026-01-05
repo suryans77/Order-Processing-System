@@ -19,7 +19,7 @@ public class OrderOutboxEvent extends BaseOutboxEvent {
         super("Order", aggregateId, eventType, payload);
     }
 
-    public static OrderOutboxEvent createOrder(
+    public static OrderOutboxEvent create_OrderCreatedEvent(
             UUID orderId,
             String payload
     ) {

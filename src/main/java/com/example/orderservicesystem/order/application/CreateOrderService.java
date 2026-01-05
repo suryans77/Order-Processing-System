@@ -3,8 +3,8 @@ package com.example.orderservicesystem.order.application;
 import com.example.orderservicesystem.order.domain.Order;
 import com.example.orderservicesystem.order.domain.OrderCreatedEvent;
 import com.example.orderservicesystem.order.domain.OrderOutboxEvent;
+import com.example.orderservicesystem.order.infrastructure.OrderOutboxRepository;
 import com.example.orderservicesystem.order.infrastructure.OrderRepository;
-import com.example.orderservicesystem.order.infrastructure.OutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,50 +15,63 @@ import java.math.BigDecimal;
 public class CreateOrderService {
 
     private final OrderRepository orderRepository;
-    private final OutboxRepository outboxRepository;
+    private final OrderOutboxRepository orderOutboxRepository;
     private final ObjectMapper objectMapper;
 
-    public CreateOrderService(OrderRepository orderRepository,
-                              OutboxRepository outboxRepository,
-                              ObjectMapper objectMapper) {
+    public CreateOrderService(
+            OrderRepository orderRepository,
+            OrderOutboxRepository orderOutboxRepository,
+            ObjectMapper objectMapper
+    ) {
         this.orderRepository = orderRepository;
-        this.outboxRepository = outboxRepository;
+        this.orderOutboxRepository = orderOutboxRepository;
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Idempotent order creation.
+     * Same idempotencyKey => same Order returned.
+     */
     @Transactional
     public Order createOrder(BigDecimal amount, String idempotencyKey) {
 
-        return orderRepository.findByIdempotencyKey(idempotencyKey)
+        return orderRepository
+                .findByIdempotencyKey(idempotencyKey)
                 .orElseGet(() -> createNewOrder(amount, idempotencyKey));
     }
 
     private Order createNewOrder(BigDecimal amount, String idempotencyKey) {
 
-        // 1️⃣ Save Order
+        // 1️⃣ Create + persist Order (source of truth)
         Order order = Order.create(amount, idempotencyKey);
-        Order saved = orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
-        // 2️⃣ Build domain event + payload
-        OrderCreatedEvent event = new OrderCreatedEvent(saved.getId());
-        String payload = serialize(event);
+        // 2️⃣ Create domain event
+        OrderCreatedEvent domainEvent =
+                new OrderCreatedEvent(savedOrder.getId());
 
-        // 3️⃣ Save Outbox event in SAME TX
-        OrderOutboxEvent outbox = OrderOutboxEvent.createOrder(
-                saved.getId();
-                payload
-        );
+        // 3️⃣ Serialize event payload
+        String payload = serialize(domainEvent);
 
-        outboxRepository.save(outbox);
+        // 4️⃣ Persist Outbox event (same transaction!)
+        OrderOutboxEvent outboxEvent =
+                OrderOutboxEvent.create_OrderCreatedEvent(
+                        savedOrder.getId(),
+                        payload
+                );
 
-        return saved;
+        orderOutboxRepository.save(outboxEvent);
+
+        return savedOrder;
     }
 
     private String serialize(Object event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to serialize event", e);
+            throw new IllegalStateException(
+                    "Failed to serialize domain event", e
+            );
         }
     }
 }

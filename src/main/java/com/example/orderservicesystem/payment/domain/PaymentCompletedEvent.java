@@ -1,4 +1,4 @@
-package com.example.orderservicesystem.order.domain;
+package com.example.orderservicesystem.payment.domain;
 
 import java.util.UUID;
 
