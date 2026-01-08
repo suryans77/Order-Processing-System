@@ -29,5 +29,12 @@ public class OrderOutboxEvent extends BaseOutboxEvent {
                 payload
         );
     }
+
+    public static OrderOutboxEvent create_RefundRequestEvent(UUID aggregateId, String payload) {
+        return new OrderOutboxEvent(aggregateId, "REFUND_REQUESTED", payload);
+    }
+
+    public static OrderOutboxEvent create_ReserveInventoryEvent(UUID id, String payload) {
+    }
 }
 
