@@ -44,7 +44,6 @@ public class PaymentResponseConsumer {
             orderRepository.save(order);
 
             // 3. Trigger Next Step: Inventory
-            // Ensure ReserveInventoryEvent is defined in your domain
             String payload = objectMapper.writeValueAsString(new ReserveInventoryEvent(order.getId()));
             OrderOutboxEvent nextStep = OrderOutboxEvent.create_ReserveInventoryEvent(order.getId(), payload);
             outboxRepository.save(nextStep);
