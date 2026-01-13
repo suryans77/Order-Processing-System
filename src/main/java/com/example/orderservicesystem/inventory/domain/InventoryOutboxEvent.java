@@ -13,4 +13,8 @@ public class InventoryOutboxEvent extends BaseOutboxEvent {
         super("INVENTORY", aggregateId, eventType, payload);
     }
     protected InventoryOutboxEvent() {}
+
+    public static InventoryOutboxEvent create_InventoryResult(UUID orderId, String payload) {
+        return new InventoryOutboxEvent(orderId, "INVENTORY_RESULT", payload);
+    }
 }

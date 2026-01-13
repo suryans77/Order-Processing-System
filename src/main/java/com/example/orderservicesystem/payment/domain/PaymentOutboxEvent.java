@@ -13,4 +13,8 @@ public class PaymentOutboxEvent extends BaseOutboxEvent {
         super("PAYMENT", aggregateId, eventType, payload);
     }
     protected PaymentOutboxEvent() {}
+
+    public static PaymentOutboxEvent create_PaymentCompleted(UUID orderId, String payload) {
+        return new PaymentOutboxEvent(orderId, "PAYMENT_COMPLETED", payload);
+    }
 }
