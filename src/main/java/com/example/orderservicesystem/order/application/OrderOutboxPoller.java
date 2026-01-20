@@ -1,5 +1,6 @@
-package com.example.orderservicesystem.payment.application;
+package com.example.orderservicesystem.order.application;
 
+import com.example.orderservicesystem.order.infrastructure.OrderOutboxRepository;
 import com.example.orderservicesystem.shared.application.EventPublisher;
 import com.example.orderservicesystem.order.domain.OrderOutboxEvent;
 import com.example.orderservicesystem.shared.application.AbstractOutboxPoller;

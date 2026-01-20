@@ -1,4 +1,4 @@
-package com.example.orderservicesystem.inventory.application;
+package com.example.orderservicesystem.payment.application;
 
 import com.example.orderservicesystem.shared.application.EventPublisher;
 import com.example.orderservicesystem.payment.domain.PaymentOutboxEvent;

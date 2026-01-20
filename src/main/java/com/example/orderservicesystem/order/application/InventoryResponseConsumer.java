@@ -36,7 +36,7 @@ public class InventoryResponseConsumer {
 
     @Transactional
     @KafkaListener(topics = "inventory-events", groupId = "order-service-group")
-    public void onInventoryResult(String message, @Header("kafka_messageId") UUID eventId) {
+    public void onInventoryResult(String message, @Header("Kafka_messageId") UUID eventId) {
         // 1. Idempotency Check
         if (processedRepository.existsById(eventId)) return;
 

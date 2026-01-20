@@ -1,4 +1,4 @@
-package com.example.orderservicesystem.refund.application;
+package com.example.orderservicesystem.inventory.application;
 
 import com.example.orderservicesystem.shared.application.EventPublisher;
 import com.example.orderservicesystem.inventory.domain.InventoryOutboxEvent;

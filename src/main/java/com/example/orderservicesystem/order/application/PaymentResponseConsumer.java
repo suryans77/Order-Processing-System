@@ -30,7 +30,7 @@ public class PaymentResponseConsumer {
 
     @Transactional
     @KafkaListener(topics = "payment-events", groupId = "order-service-group")
-    public void onPaymentResult(String message, @Header("kafka_messageId") UUID eventId) {
+    public void onPaymentResult(String message, @Header("Kafka_messageId") UUID eventId) {
         // 1. Idempotency Check - Use the UUID directly
         if (processedRepository.existsById(eventId)) return;
 
